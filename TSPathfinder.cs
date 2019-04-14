@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThetaStarSharpExample;
 
 namespace ThetaStarSharp
 {
@@ -89,7 +90,7 @@ namespace ThetaStarSharp
             if (!Map.Trace(ToList(Bounds), End, ExcludeIDs, ExcludeFlags))
                 return null;
 
-            HashSet<Tuple<int, int>> closed = new HashSet<Tuple<int, int>>();
+            HashSet<Tuple<int, int, int>> closed = new HashSet<Tuple<int, int, int>>();
             FastPriorityQueue<Unvisited> open = new FastPriorityQueue<Unvisited>(256);
 
             var uvStart = new Unvisited()
@@ -101,6 +102,7 @@ namespace ThetaStarSharp
             };
             
             QueueCollidables(uvStart, collidables, open, closed);
+            
             while (open.Count > 0)
             {
                 Unvisited next = open.Dequeue();
@@ -112,79 +114,90 @@ namespace ThetaStarSharp
 
             return null;
         }
-
-        private void QueueCollidables(Unvisited from, List<T> cols, FastPriorityQueue<Unvisited> open, HashSet<Tuple<int, int>> closed)
+        
+        private void QueueCollidables(Unvisited from, List<T> cols, FastPriorityQueue<Unvisited> open, HashSet<Tuple<int, int, int>> closed)
         {
             float aabbW = Bounds.AABB.Width;
             float aabbH = Bounds.AABB.Height;
 
-            HashSet<Tuple<int, int>> myClosed = null;
+            HashSet<Tuple<int, int, int>> myClosed = null;
             for(int colsInd = 0, colsLen = cols.Count; colsInd < colsLen; colsInd++)
             {
                 TSCollidable collidable = cols[colsInd];
                 Vector2 cent = collidable.Bounds.Center;
                 for(int vertsInd = 0, vertsLen = collidable.Bounds.Vertices.Length; vertsInd < vertsLen; vertsInd++)
                 {
-                    var tup = Tuple.Create(collidable.ID, vertsInd);
-                    if (closed.Contains(tup))
-                        continue;
-                    if (myClosed != null && myClosed.Contains(tup))
-                        continue;
-
                     Vector2 vert = collidable.Bounds.Vertices[vertsInd];
-                    Vector2 delt = vert - cent;
-                    Vector2 point = new Vector2(vert.X, vert.Y);
-                    if (delt.X < 0)
-                        point.X -= aabbW + 0.01f;
-                    else
-                        point.X += 0.01f;
-                    if (delt.Y < 0)
-                        point.Y -= aabbH + 0.01f;
-                    else
-                        point.Y += 0.01f;
-                    point += collidable.Position;
-                    if (Math2.Approximately(point, from.Location))
+                    for (int myVertInd = 0, myVertsLen = Bounds.Vertices.Length; myVertInd < myVertsLen; myVertInd++)
                     {
-                        closed.Add(tup);
-                        continue;
-                    }
+                        var tup = Tuple.Create(collidable.ID, vertsInd, myVertInd);
+                        if (closed.Contains(tup))
+                            continue;
+                        if (myClosed != null && myClosed.Contains(tup))
+                            continue;
+                        Vector2 myVert = Bounds.Vertices[myVertInd];
 
-                    if(!Map.Contains(Bounds, point))
-                    {
-                        closed.Add(tup);
-                        continue;
-                    }
-
-                    var inters = Map.TraceExhaust(ToList(Bounds), point, ExcludeIDs, ExcludeFlags);
-                    if (inters.Count != 0)
-                    {
-                        if (myClosed == null)
-                            myClosed = new HashSet<Tuple<int, int>>();
-                        myClosed.Add(tup);
-                        cols.AddRange(inters);
-                        colsLen += inters.Count;
-                        continue;
-                    }
-
-                    List<T> tmp = Map.TraceExhaust(Bounds, from.Location, point, ExcludeIDs, ExcludeFlags);
-                    if(tmp.Count == 0)
-                    {
-                        closed.Add(tup);
-                        var unv = new Unvisited()
+                        Vector2 point = new Vector2(vert.X - myVert.X, vert.Y - myVert.Y);
+                        point += collidable.Position;
+                        
+                        if (Math2.Approximately(point, from.Location))
                         {
-                            Parent = from,
-                            Location = point,
-                            DistanceStartToHere = from.DistanceStartToHere + (point - from.Location).Length(),
-                            HeurDistanceHereToDest = (End - point).Length()
-                        };
-                        open.Enqueue(unv, unv.CorrectPrio);
-                    }else
-                    {
-                        if (myClosed == null)
-                            myClosed = new HashSet<Tuple<int, int>>();
-                        myClosed.Add(tup);
-                        cols.AddRange(tmp);
-                        colsLen += tmp.Count;
+                            closed.Add(tup);
+                            continue;
+                        }
+
+                        if (!Map.Contains(Bounds, point))
+                        {
+                            closed.Add(tup);
+                            continue;
+                        }
+
+                        var inters = Map.TraceExhaust(ToList(Bounds), point, ExcludeIDs, ExcludeFlags);
+                        if (inters.Count != 0)
+                        {
+                            if (myClosed == null)
+                                myClosed = new HashSet<Tuple<int, int, int>>();
+                            myClosed.Add(tup);
+
+                            for (int i = 0; i < inters.Count; i++)
+                            {
+                                if (inters[i] != collidable)
+                                {
+                                    cols.Add(inters[i]);
+                                    colsLen++;
+                                }
+                            }
+                            continue;
+                        }
+
+                        List<T> tmp = Map.TraceExhaust(Bounds, from.Location, point, ExcludeIDs, ExcludeFlags);
+                        if (tmp.Count == 0)
+                        {
+                            closed.Add(tup);
+                            var unv = new Unvisited()
+                            {
+                                Parent = from,
+                                Location = point,
+                                DistanceStartToHere = from.DistanceStartToHere + (point - from.Location).Length(),
+                                HeurDistanceHereToDest = (End - point).Length()
+                            };
+                            open.Enqueue(unv, unv.CorrectPrio);
+                        }
+                        else
+                        {
+                            if (myClosed == null)
+                                myClosed = new HashSet<Tuple<int, int, int>>();
+                            myClosed.Add(tup);
+
+                            for (int i = 0; i < tmp.Count; i++)
+                            {
+                                if (tmp[i] != collidable)
+                                {
+                                    cols.Add(tmp[i]);
+                                    colsLen++;
+                                }
+                            }
+                        }
                     }
                 }
             }
