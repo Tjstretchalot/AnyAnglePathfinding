@@ -99,8 +99,8 @@ This package is not suitable if any of the following apply:
 - Your entities can only move in a limited number of directions (i.e. cardinal directions)
 - It is more expensive to move over some parts of the map then others, **and you want this taken into account during pathfinding**
 - Optimal pathing is more important than quickly finding paths
-- There are relatively few paths that will get you to the destination. That is the world is not relatively open.
-  - Navigating through a maze is not going to be fast using this algorithm
+- There are relatively few paths that will get you to the destination. In other words, the world is not relatively open.
+  - Navigating through a maze will work but is not going to be fast using this algorithm
 
 This package is meant for you (and you should submit issues to address any problems) if:
 
@@ -118,7 +118,7 @@ This package is meant for you (and you should submit issues to address any probl
 ```csharp
 // define your flags by incrementing the number on the right.
 // this gives you up to 63 flags. You can use an enum with [Flags]
-// set to long as well
+// which subtypes long as well
 long TEAM_1 = 1 << 0; // 2^0
 long TEAM_2 = 1 << 1; // 2^1
 
