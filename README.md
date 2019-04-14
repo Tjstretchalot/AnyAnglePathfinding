@@ -10,6 +10,12 @@ the difficult of calculating the path does not depend on the map size but rather
 of the path produced. This ensures that even when the paths are slow it is intuitive *why* the paths
 are slow and thus easier for level designers to avoid pathological cases.
 
+## Videos
+
+The following video demonstrates paths from this library. ***Click for higher quality***
+
+[![Paths example](docs/example.gif)](https://www.youtube.com/watch?v=bt-QorgXXWQ)
+
 ## Installation
 
 Open either a [git for windows terminal](https://gitforwindows.org/) (windows) or the standard
