@@ -6,7 +6,7 @@
     <SharedGUID>3eb83f10-53c9-4eae-b77a-91b56ca39123</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>ThetaStarSharp</Import_RootNamespace>
+    <Import_RootNamespace>AnyAnglePathfinding</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AACollidable.cs" />
