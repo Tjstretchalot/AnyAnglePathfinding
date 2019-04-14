@@ -25,7 +25,7 @@ example](docs/example.gif)](https://www.youtube.com/watch?v=bt-QorgXXWQ)
 
 ### Without Monogame / With NuGet
 
-https://www.nuget.org/packages/AAPathfinding_Nuget_Nomono/1.0.0
+https://www.nuget.org/packages/AAPathfinding_Nuget_Nomono/
 
 ### With Monogame / Without NuGet
 
