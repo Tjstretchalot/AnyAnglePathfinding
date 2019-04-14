@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>3eb83f10-53c9-4eae-b77a-91b56ca39123</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>ThetaStarSharp</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)TSCollidable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SimpleTSMap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TSMap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TSPathfinder.cs" />
+  </ItemGroup>
+</Project>
