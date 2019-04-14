@@ -6,14 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThetaStarSharp
+namespace AnyAnglePathfinding
 {
     /// <summary>
     /// Describes a generic collidable object inside the map. This is not meant to correspond to
     /// the update / rendering logic that you would have, just as the container for collision
     /// information. It's reasonable to suspect that a single entity will have multiple collidables.
     /// </summary>
-    public class TSCollidable
+    public class AACollidable
     {
         /// <summary>
         /// The unique identifier for this collidable

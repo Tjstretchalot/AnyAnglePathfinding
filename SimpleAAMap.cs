@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThetaStarSharp
+namespace AnyAnglePathfinding
 {
     /// <summary>
     /// Describes a rectangular map on which pathfinding can occur. The map contains the collidables
@@ -17,7 +17,7 @@ namespace ThetaStarSharp
     /// and not conducive to 
     /// </summary>
     /// <typeparam name="T">The type of collidables that are on this map</typeparam>
-    public class SimpleTSMap<T> : TSMap<T> where T : TSCollidable
+    public class SimpleAAMap<T> : AAMap<T> where T : AACollidable
     {
         /// <summary>
         /// The width of the map
@@ -45,7 +45,7 @@ namespace ThetaStarSharp
         /// </summary>
         /// <param name="width">The width of the map, used for contains</param>
         /// <param name="height">The height of the map, used for contains</param>
-        public SimpleTSMap(int width, int height)
+        public SimpleAAMap(int width, int height)
         {
             Collidables = new List<T>();
             CollidableCounter = 0;

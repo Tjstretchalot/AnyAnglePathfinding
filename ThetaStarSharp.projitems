@@ -9,9 +9,9 @@
     <Import_RootNamespace>ThetaStarSharp</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)TSCollidable.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SimpleTSMap.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TSMap.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TSPathfinder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AACollidable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SimpleAAMap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AAMap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AAPathfinder.cs" />
   </ItemGroup>
 </Project>

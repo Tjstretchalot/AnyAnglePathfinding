@@ -6,9 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ThetaStarSharpExample;
 
-namespace ThetaStarSharp
+namespace AnyAnglePathfinding
 {
     /// <summary>
     /// The central class for this package. A single pathfinder is used for a single path. Calculates
@@ -17,7 +16,7 @@ namespace ThetaStarSharp
     /// way it would try to go around it.
     /// </summary>
     /// <typeparam name="T">The entity type</typeparam>
-    public class TSPathfinder<T> where T : TSCollidable
+    public class AAPathfinder<T> where T : AACollidable
     {
         /// <summary>
         /// These go onto a priority queue for nodes we decide to expand.
@@ -49,7 +48,7 @@ namespace ThetaStarSharp
             public float CorrectPrio => DistanceStartToHere + HeurDistanceHereToDest * 1.5f;
         }
 
-        private TSMap<T> Map;
+        private AAMap<T> Map;
         private Polygon2 Bounds;
         private Vector2 Start;
         private Vector2 End;
@@ -66,7 +65,7 @@ namespace ThetaStarSharp
         /// <param name="end">where the path should end</param>
         /// <param name="excludeIds">the ids of collidables to ignore in the path calculation</param>
         /// <param name="excludeFlags">collidables with flags to exclude</param>
-        public TSPathfinder(TSMap<T> map, Polygon2 bounds, Vector2 start, Vector2 end, HashSet<int> excludeIds, long excludeFlags)
+        public AAPathfinder(AAMap<T> map, Polygon2 bounds, Vector2 start, Vector2 end, HashSet<int> excludeIds, long excludeFlags)
         {
             Map = map;
             Bounds = bounds;
@@ -123,7 +122,7 @@ namespace ThetaStarSharp
             HashSet<Tuple<int, int, int>> myClosed = null;
             for(int colsInd = 0, colsLen = cols.Count; colsInd < colsLen; colsInd++)
             {
-                TSCollidable collidable = cols[colsInd];
+                AACollidable collidable = cols[colsInd];
                 Vector2 cent = collidable.Bounds.Center;
                 for(int vertsInd = 0, vertsLen = collidable.Bounds.Vertices.Length; vertsInd < vertsLen; vertsInd++)
                 {

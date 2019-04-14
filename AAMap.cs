@@ -4,13 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ThetaStarSharp
+namespace AnyAnglePathfinding
 {
     /// <summary>
     /// Describes a map on which any-angle raytraced pathfinding can occur.
     /// </summary>
     /// <typeparam name="T">The entity which is inside the map</typeparam>
-    public interface TSMap<T> where T : TSCollidable
+    public interface AAMap<T> where T : AACollidable
     {
         /// <summary>
         /// Determines if the polygon at the given position is entirely contained within the map.
