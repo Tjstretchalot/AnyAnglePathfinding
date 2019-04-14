@@ -2,9 +2,9 @@
 
 This package was originally a Theta Star Sharp* implementation, however it is now a generic any-angle
 pathfinding algorithm that depends on [SharpMath2](https://github.com/Tjstretchalot/sharpmath2). The
-change occurred for two reasons: faster performance, simpler implmentation.
+change occurred for two reasons: faster performance, simpler implementation.
 
-This package does not require a grid-stystem and does not give optimal paths, however it seems that
+This package does not require a grid-system and does not give optimal paths, however it seems that
 for a 2D rts style game this is sufficiently fast and gives sufficiently good paths. Importantly,
 the difficult of calculating the path does not depend on the map size but rather the complexity
 of the path produced. This ensures that even when the paths are slow it is intuitive *why* the paths
@@ -90,12 +90,12 @@ The most direct way to incorporate ThetaStarSharp into an existing project:
 
 This is not a grid-based pathfinding algorithm. Furthermore, tracing polygons across arbitrary distances requires polygon
 collision detection which is not trivial to implement on your own. By incorporating this project you get the flexibility
-of any-angle pathfinding on a 2d grid in just a few lines of code. Furthermore you no longer have to worry about grid size
+of any-angle pathfinding on a plane in just a few lines of code. Furthermore you no longer have to worry about grid size
 as a hyperparamter in your pathfinding performance, which improves generalizability.
 
 This package is not suitable if any of the following apply:
 
-- Movement is not identical on a 2d plane (i.e. sidescrollers cannot use this package)
+- Movement is not identical on a plane (i.e. sidescrollers cannot use this package)
 - Your entities can only move in a limited number of directions (i.e. cardinal directions)
 - It is more expensive to move over some parts of the map then others, **and you want this taken into account during pathfinding**
 - Optimal pathing is more important than quickly finding paths
