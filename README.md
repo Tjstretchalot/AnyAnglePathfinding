@@ -91,7 +91,7 @@ The most direct way to incorporate ThetaStarSharp into an existing project:
 This is not a grid-based pathfinding algorithm. Furthermore, tracing polygons across arbitrary distances requires polygon
 collision detection which is not trivial to implement on your own. By incorporating this project you get the flexibility
 of any-angle pathfinding on a plane in just a few lines of code. Furthermore you no longer have to worry about grid size
-as a hyperparamter in your pathfinding performance, which improves generalizability.
+as a hyperparamater in your pathfinding performance, which improves generalizability.
 
 This package is not suitable if any of the following apply:
 
