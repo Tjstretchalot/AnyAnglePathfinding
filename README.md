@@ -55,6 +55,8 @@ package.
 Right click "References" inside your main project. Under shared projects (left),
 check "SharpMath2" and "AnyAnglePathfinding".
 
+Add the NuGet package [High-Speed-Priority-Queue](https://github.com/BlueRaja/High-Speed-Priority-Queue-for-C-Sharp)
+
 ## Quickstart
 
 ```csharp
