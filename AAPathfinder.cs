@@ -216,7 +216,7 @@ namespace AnyAnglePathfinding
             return inReverseOrder;
         }
 
-        private static List<T> ToList<T>(params T[] v)
+        private static List<E> ToList<E>(params E[] v)
         {
             return v.ToList();
         }

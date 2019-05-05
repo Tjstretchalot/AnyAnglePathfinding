@@ -60,7 +60,7 @@ Add the NuGet package [High-Speed-Priority-Queue](https://github.com/BlueRaja/Hi
 ## Quickstart
 
 ```csharp
-var map = new SimpleAAMap<AACollidable>(200, 100);
+var map = new RectPartitionAAMap<AACollidable>(200, 100);
 
 var entity = new AACollidable()
 {
@@ -97,18 +97,17 @@ You will need a map class that implements `AAMap<T>`. This class will need to be
 able to trace polygons as they move through your world. In general your
 implementation can mirror the `SimpleAAMap<T>` class, except you should
 incorporate some space partitioning system in order to prevent the n^2 collision
-detection costs. Including several `SimpleAAMap<T>` which simply ignore the
-Width/Height parameter is one ultra-simple approach to do this. Although not
-required, leveraging the SharpMath2 raytraceables is a reasonably fast
-implementation for doing these traces when combined with a space partitioning
-system and will ensure that the map size you choose does not effect performance.
+detection costs. Luckily you can get a great amount of benefit from the general
+implementation provided with `RectPartitionAAMap<T>` which will automatically
+partition your map into rectangles calculated from the location of entities:
+
+![Partitioning example](docs/rectpartition.png)
 
 The most direct way to incorporate ThetaStarSharp into an existing project:
 
 - Have your entity class extend (or include) `AACollidable`
-- Have your map class implement `AAMap<T>` where T is your entity class
-  - If you don't want to worry about space partitioning yet, have it just extend
-    `SimpleAAMap<T>` and use `SimpleAAMap<T>.Collidables` as your entity list
+- Have your map class include a `RectPartitionAAMap<T>` instance where `T` is
+your Entity class
 - Calculate paths via `new AAPathfinder(map, bounds, start, end, excludeIds,
   excludeFlags).CalculatePath()`
 
@@ -157,6 +156,7 @@ problems) if:
 long TEAM_1 = 1 << 0; // 2^0
 long TEAM_2 = 1 << 1; // 2^1
 
+var map = new RectPartitionAAMap<AACollidable>(2000, 1000);
 var entity = new AACollidable()
 {
     Position = new Vector2(50, 70),
