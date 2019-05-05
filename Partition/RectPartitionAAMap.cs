@@ -21,10 +21,26 @@ namespace AnyAnglePathfinding.Partition
         // If p(x) is the punishment for a given point, the line is chosen to minimize p(x).
         //
         // linear term must dominate derivative between points! Changing these arbitrarily can break the approximation
+
+        /// <summary>
+        /// The quadratic factor for punishment; punishment changes as a function of 1/(punish_quad*x*x)
+        /// </summary>
         public const double PUNISH_QUAD = 16;
+
+        /// <summary>
+        /// The linear factor for punishment; punishment changes as a function of (1/(punish_linear*x))
+        /// </summary>
         public const double PUNISH_LINEAR = 25;
+
+        /// <summary>
+        /// The constant factor for punishment; added to the denominator to avoid infinity. Smaller values correspond with sharper
+        /// peaks around entities
+        /// </summary>
         public const double PUNISH_CONST = 0.7;
 
+        /// <summary>
+        /// Describes the flags / boolean variables that a partition has
+        /// </summary>
         [Flags]
         public enum PartitionFlags : int
         {
@@ -217,7 +233,8 @@ namespace AnyAnglePathfinding.Partition
         /// <param name="height"></param>
         /// <param name="minPartitionEntities">The minimum number of entities we will use when scanning for a new partition line.</param>
         /// <param name="maxPartitionEntities">The maximum number of entities we will use when scanning for a new partition line.</param>
-        /// <param name="triggerCreateEntities">The number of entities within a partition that will have us consider</param>
+        /// <param name="triggerCreateEntities">The number of entities within a partition that will have us consider making the partition more granular</param>
+        /// <param name="triggerDestroyEntities">The number of entities within a partition that will have us consider making the partition less granular</param>
         public RectPartitionAAMap(int width, int height, int minPartitionEntities = 4, int maxPartitionEntities = 20,
                                   int triggerCreateEntities = 15, int triggerDestroyEntities = 4)
         {
@@ -587,9 +604,10 @@ namespace AnyAnglePathfinding.Partition
         }
 
         /// <summary>
-        /// Gets thematlab pastable points and selection. Used for debugging
+        /// Gets the matlab pastable points and selection. Used for debugging
         /// </summary>
         /// <param name="points">the points</param>
+        /// <param name="bestLoc">The location we decided to place the separating line</param>
         /// <returns>the corresponding punish equation</returns>
         public string GetPunishPointsPastable(double[] points, double bestLoc)
         {
@@ -653,6 +671,18 @@ namespace AnyAnglePathfinding.Partition
             }
         }
 
+        /// <summary>
+        /// Actually splits the specified map into two maps at the given location
+        /// </summary>
+        /// <param name="mapInd">The index in Maps for the map to split</param>
+        /// <param name="split">The location of the split in absolute coordinates</param>
+        /// <param name="horizontal">True if this is a horizontal line split, meaning the split is a y-coordinate. False if a vertical line split, meaning the split is an x-coordinate</param>
+        /// <param name="leftWidth">The new width of the left section; exactly the original width when doing a horizontal split</param>
+        /// <param name="rightWidth">The new width of the right section; exactly the original width when doing a horizontal split</param>
+        /// <param name="leftHeight">The new height of the left section; exactly the original height when doing a vertical split</param>
+        /// <param name="rightHeight">The new height of the right section; exactly the original height when doing a vertical split</param>
+        /// <param name="rightOffsetX">Where the right is offset horizontally now; exactly the original offset x for a horizontal split and split for a vertical split</param>
+        /// <param name="rightOffsetY">Where the right is offset vertically now; exactly the original offset y for a vertical split and split for a horizontal split</param>
         public void DoSplit(int mapInd, float split, bool horizontal, float leftWidth, float rightWidth, float leftHeight, float rightHeight, float rightOffsetX, float rightOffsetY)
         {
             PartitionMap oldMap = this.Maps[mapInd];
@@ -823,6 +853,7 @@ namespace AnyAnglePathfinding.Partition
         /// <param name="newY">the y-component that the child will have</param>
         /// <param name="newWidth">the width that the new child will have</param>
         /// <param name="newHeight">the height that the new child will have</param>
+        /// <param name="newMapInd">Stores the index for the map that the partition is now completely encompassed by</param>
         /// <param name="mapHoleRolling">like partitionHoleRolling but for the maps</param>
         /// <param name="partitionHoleRolling">for a given partition index 0 &lt;= i &lt; NumPartitions, j = i - partitionHoleRolling[i] gives the new partition index after this merge</param>
         private void MergeAllChildren(int partitionInd, bool left, float newX, float newY, float newWidth, float newHeight, out int newMapInd, out int[] mapHoleRolling, out int[] partitionHoleRolling)
@@ -1080,6 +1111,10 @@ namespace AnyAnglePathfinding.Partition
         /// </summary>
         /// <param name="partInd">The partition</param>
         /// <param name="left">The side of the partition you are interested in</param>
+        /// <param name="x">The x-coordinate of the map that the partition describes</param>
+        /// <param name="y">The y-coordinate of the map that the partition describes</param>
+        /// <param name="width">The width of the map that the partition describes</param>
+        /// <param name="height">The height of the map that the partition describes</param>
         public void FindMapLocation(int partInd, bool left, out float x, out float y, out float width, out float height)
         {
             width = this.Width;
@@ -1134,8 +1169,8 @@ namespace AnyAnglePathfinding.Partition
         /// <summary>
         /// Looks through all the partitions effected by a polygon at the given location and considers
         /// pruning them. The Maps and Partitions arrays may change drastically after this operation.
-        /// <param name="bounds">The bounds of the polygon which moved</param>
-        /// <param name="pos">The position of the polygon</param>
+        /// </summary>
+        /// <param name="maps">The maps that you are considering pruning</param>
         public void ConsiderPruneMany(IEnumerable<int> maps)
         {
             Stack<Tuple<int, bool, int>> dirty = new Stack<Tuple<int, bool, int>>();
