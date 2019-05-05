@@ -1268,13 +1268,16 @@ namespace AnyAnglePathfinding.Partition
         }
 
         /// <summary>
-        /// Adds a new collidable to the map. Assigns it a unique id.
+        /// Adds a new collidable to the map. Assigns it a unique id if forceId is false, otherwise
+        /// keeps the id the same. Once you use forceId you must always use it
         /// </summary>
         /// <param name="collidable">The collidable to add</param>
+        /// <param name="forceId">If set to true then the id is not replaced</param>
         /// <returns>the id of the collidable, collidable.ID, after assigning it one</returns>
-        public int Register(T collidable)
+        public int Register(T collidable, bool forceId=false)
         {
-            collidable.ID = this.CollidableCounter++;
+            if(!forceId)
+                collidable.ID = this.CollidableCounter++;
 
             List<int> maps = new List<int>();
             FindMaps(collidable.Bounds, collidable.Position, maps);
