@@ -110,6 +110,25 @@ The most direct way to incorporate ThetaStarSharp into an existing project:
 your Entity class
 - Calculate paths via `new AAPathfinder(map, bounds, start, end, excludeIds,
   excludeFlags).CalculatePath()`
+- Move entities with `Map.Move(int id, Vector2 pos)` - some work needs to be done
+  to keep the partitions accurate. Failing to do this will cause cascading errors.
+
+## Common Issues
+
+When using the `RectPartitionAAMap<T>` it is essential that you do not modify the
+position of collidables directly, instead using `Move(int id, Vector2 position)` where
+id is the id of the collidable to move. If you see the pathfinder **attempting to path
+through another entity**, then the partition has broken. First use Visual Studio Code to
+find all references to the Position for your AACollidable class and verify it's not being
+modified anywhere. If it is not, turn on the compiler flag `PARTITION_DEBUG` and re-run.
+This will verify the state of the partition before and after each operation, which will
+allow you to isolate where the problem is occurring. If it happens on the second check
+within a function, it is a bug with this project. If it happens on the first check within
+a function (i.e., before it has done anything), it is a bug with your project.
+
+If it doesn't catch any issues, then it must be something else. For this particular bug,
+verify that the entity is actually added to the pathfinder. This is as simple as checking
+`Map.CollidablesLookup.ContainsKey(ent.ID)`.
 
 ## Comparison to other pathfinding algorithms
 

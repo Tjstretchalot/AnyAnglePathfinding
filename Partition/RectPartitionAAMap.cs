@@ -2,6 +2,7 @@
 using SharpMath2;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace AnyAnglePathfinding.Partition
 {
@@ -283,6 +284,94 @@ namespace AnyAnglePathfinding.Partition
             this.CollidablesLookup = new Dictionary<int, T>();
         }
 
+#if PARTITION_DEBUG
+        /// <summary>
+        /// A debug command that verifies that the collidables are all in the correct partitions.
+        /// This is the guarrantee that makes all the other stuff work. It can be difficult to
+        /// figure out when this guarrantee fails (via a bug).
+        /// </summary>
+        public void VerifyPartitions()
+        {
+            List<string> errors = new List<string>();
+            for(int i = 0, len = NumMaps; i < len; i++)
+            {
+                var map = Maps[i];
+
+                List<T> expected = new List<T>();
+                for (int j = 0, len2 = Collidables.Count; j < len2; j++)
+                {
+                    var coll = Collidables[j];
+                    if (Shape2.Intersects(map.Rect, coll.Bounds, map.Position, coll.Position, false))
+                    {
+                        expected.Add(coll);
+                    }
+                }
+
+                List<T> missing = new List<T>();
+                for (int j = 0, len2 = expected.Count; j < len2; j++)
+                {
+                    if (!map.Map.Collidables.Contains(expected[j]))
+                    {
+                        missing.Add(expected[j]);
+                    }
+                }
+
+                List<T> extra = new List<T>();
+                for (int j = 0, len2 = map.Map.Collidables.Count; j < len2; j++)
+                {
+                    if (!expected.Contains(map.Map.Collidables[j]))
+                    {
+                        extra.Add(map.Map.Collidables[j]);
+                    }
+                }
+
+                if (missing.Count > 0 || extra.Count > 0)
+                {
+                    StringBuilder err = new StringBuilder();
+                    err.AppendFormat("Maps[{0}] from ({1}, {2}) to ({3}, {4}) is bad: \n",
+                                     i, map.Position.X, map.Position.Y, map.Position.X + map.Rect.Width,
+                                     map.Position.Y + map.Rect.Height);
+                    if (missing.Count > 0)
+                    {
+                        err.AppendFormat("  Missing {0} entities: \n", missing.Count);
+                        for (int j = 0, len2 = missing.Count; j < len2; j++)
+                        {
+                            var ent = missing[j];
+                            err.AppendFormat("    ID {0} from ({1}, {2}) to ({3}, {4})\n", ent.ID, ent.Position.X, ent.Position.Y,
+                                             ent.Position.X + ent.Bounds.AABB.Width, ent.Position.Y + ent.Bounds.AABB.Height);
+                        }
+                        err.Append("\n");
+                    }
+
+                    if (extra.Count > 0)
+                    {
+                        err.AppendFormat("  Extra {0} entities: \n", extra.Count);
+                        for (int j = 0, len2 = extra.Count; j < len2; j++)
+                        {
+                            var ent = extra[j];
+                            err.AppendFormat("    ID {0} from ({1}, {2}) to ({3}, {4})\n", ent.ID, ent.Position.X, ent.Position.Y,
+                                             ent.Position.X + ent.Bounds.AABB.Width, ent.Position.Y + ent.Bounds.AABB.Height);
+                        }
+                        err.Append("\n");
+                    }
+
+                    errors.Add(err.ToString());
+                }
+            }
+
+            if (errors.Count > 0)
+            {
+                var err = new StringBuilder();
+                err.AppendFormat("RectPartitionAAMap invalid ({0} errors): \n", errors.Count);
+                for (int i = 0, len = errors.Count; i < len; i++)
+                {
+                    err.AppendLine(errors[i]);
+                }
+                throw new InvalidProgramException(err.ToString());
+            }
+        }
+#endif
+
         /// <summary>
         /// Finds the map that the given vector belongs to. Chooses the left when ambiguous
         /// </summary>
@@ -457,6 +546,10 @@ namespace AnyAnglePathfinding.Partition
                 throw new ArgumentException($"cannot resize to {newCapacity} when we have {this.NumPartitions}");
             }
 
+#if PARTITION_DEBUG
+            VerifyPartitions();
+#endif
+
             Partition[] newParts = new Partition[newCapacity];
             for (int i = 0; i < this.NumPartitions; i++)
             {
@@ -464,6 +557,10 @@ namespace AnyAnglePathfinding.Partition
             }
 
             this.Partitions = newParts;
+
+#if PARTITION_DEBUG
+            VerifyPartitions();
+#endif
         }
 
         /// <summary>
@@ -477,6 +574,10 @@ namespace AnyAnglePathfinding.Partition
                 throw new ArgumentException($"cannot resize to {newCapacity} when we have {this.NumMaps}");
             }
 
+#if PARTITION_DEBUG
+            VerifyPartitions();
+#endif
+
             PartitionMap[] newMaps = new PartitionMap[newCapacity];
             for (int i = 0; i < this.NumMaps; i++)
             {
@@ -484,6 +585,10 @@ namespace AnyAnglePathfinding.Partition
             }
 
             this.Maps = newMaps;
+
+#if PARTITION_DEBUG
+            VerifyPartitions();
+#endif
         }
 
         /// <summary>
@@ -685,6 +790,10 @@ namespace AnyAnglePathfinding.Partition
         /// <param name="rightOffsetY">Where the right is offset vertically now; exactly the original offset y for a vertical split and split for a horizontal split</param>
         public void DoSplit(int mapInd, float split, bool horizontal, float leftWidth, float rightWidth, float leftHeight, float rightHeight, float rightOffsetX, float rightOffsetY)
         {
+
+#if PARTITION_DEBUG
+            VerifyPartitions();
+#endif
             PartitionMap oldMap = this.Maps[mapInd];
 
             int leftMapInd = mapInd;
@@ -757,6 +866,10 @@ namespace AnyAnglePathfinding.Partition
                     this.Maps[rightMapInd].Map.Collidables.Add(collidable);
                 }
             }
+
+#if PARTITION_DEBUG
+            VerifyPartitions();
+#endif
         }
 
         /// <summary>
@@ -799,6 +912,10 @@ namespace AnyAnglePathfinding.Partition
         /// <param name="mapInd">the index in maps for the map to split</param>
         public void Split(int mapInd)
         {
+#if PARTITION_DEBUG
+            VerifyPartitions();
+#endif
+
             if (this.NumPartitions == this.Partitions.Length)
             {
                 ResizePartitions(2 * this.NumPartitions);
@@ -842,6 +959,10 @@ namespace AnyAnglePathfinding.Partition
                 float trueY = (float)(this.Maps[mapInd].Position.Y + offset);
                 DoHorizontalSplit(mapInd, trueY);
             }
+
+#if PARTITION_DEBUG
+            VerifyPartitions();
+#endif
         }
 
         /// <summary>
@@ -931,7 +1052,7 @@ namespace AnyAnglePathfinding.Partition
             this.NumPartitions -= partitionHoles.Count;
             for (int indInPartitions = this.NumPartitions, end = this.NumPartitions + partitionHoles.Count; indInPartitions < end; indInPartitions++)
             {
-                this.Partitions[indInPartitions] = default;
+                this.Partitions[indInPartitions] = default(Partition);
             }
 
             mapHoles.Sort();
@@ -960,7 +1081,7 @@ namespace AnyAnglePathfinding.Partition
             this.NumMaps -= mapHoles.Count;
             for (int indInMaps = this.NumMaps, end = this.NumMaps + mapHoles.Count; indInMaps < end; indInMaps++)
             {
-                this.Maps[indInMaps] = default;
+                this.Maps[indInMaps] = default(PartitionMap);
             }
 
             // updating all references inside partitions
@@ -1276,7 +1397,10 @@ namespace AnyAnglePathfinding.Partition
         /// <returns>the id of the collidable, collidable.ID, after assigning it one</returns>
         public int Register(T collidable, bool forceId=false)
         {
-            if(!forceId)
+#if PARTITION_DEBUG
+            VerifyPartitions();
+#endif
+            if (!forceId)
                 collidable.ID = this.CollidableCounter++;
 
             List<int> maps = new List<int>();
@@ -1296,6 +1420,10 @@ namespace AnyAnglePathfinding.Partition
                 ConsiderSplit(mapInd);
             }
 
+
+#if PARTITION_DEBUG
+            VerifyPartitions();
+#endif
             return collidable.ID;
         }
 
@@ -1305,6 +1433,10 @@ namespace AnyAnglePathfinding.Partition
         /// <param name="id">The id of the collidable to remove</param>
         public void Unregister(int id)
         {
+#if PARTITION_DEBUG
+            VerifyPartitions();
+#endif
+
             T collidable = this.CollidablesLookup[id];
 
             List<int> maps = new List<int>();
@@ -1312,13 +1444,17 @@ namespace AnyAnglePathfinding.Partition
 
             for (int i = 0, mapLen = maps.Count; i < mapLen; i++)
             {
-                this.Maps[i].Map.Collidables.Remove(collidable);
+                this.Maps[maps[i]].Map.Collidables.Remove(collidable);
             }
 
             this.CollidablesLookup.Remove(id);
             this.Collidables.Remove(collidable);
 
             ConsiderPruneMany(maps);
+
+#if PARTITION_DEBUG
+            VerifyPartitions();
+#endif
         }
 
         /// <summary>
@@ -1328,6 +1464,10 @@ namespace AnyAnglePathfinding.Partition
         /// <param name="position">the new position for the collidable</param>
         public void Move(int id, Vector2 position)
         {
+#if PARTITION_DEBUG
+            VerifyPartitions();
+#endif
+
             T collidable = this.CollidablesLookup[id];
 
             List<int> oldMaps = new List<int>();
@@ -1378,6 +1518,10 @@ namespace AnyAnglePathfinding.Partition
             }
 
             ConsiderPruneMany(removedMaps);
+
+#if PARTITION_DEBUG
+            VerifyPartitions();
+#endif
         }
 
         /// <summary>
