@@ -23,12 +23,6 @@ example](docs/example.gif)](https://www.youtube.com/watch?v=bt-QorgXXWQ)
 
 ## Installation
 
-### Without Monogame / With NuGet
-
-https://www.nuget.org/packages/AAPathfinding_Nuget_Nomono/
-
-### With Monogame / Without NuGet
-
 Open either a [git for windows terminal](https://gitforwindows.org/) (windows)
 or the standard terminal (linux, mac). Move into the solution folder (i.e., `cd`
 into the folder containing the .sln folder for the project you want to use this
