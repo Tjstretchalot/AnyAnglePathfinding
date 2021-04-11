@@ -278,7 +278,7 @@ namespace AnyAnglePathfinding
                                 );
 
                                 // also try the other way, but using the "wrong" vertex. The fact we need
-                                // to check both makes a lot of since pathfinding checks should be symmetric
+                                // to check both makes a lot of sense pathfinding checks should be symmetric
                                 var tmp = ConsiderTarget(
                                     from, open, closed, collidable, vertsInd, from.OurVertexInd
                                 );
