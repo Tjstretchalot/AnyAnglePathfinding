@@ -77,7 +77,7 @@ namespace AnyAnglePathfinding.Partition
         }
 
         /// <summary>
-        /// Describes a a single partition in the map. 
+        /// Describes a a single partition in the map.
         /// </summary>
         public struct Partition
         {
@@ -165,7 +165,7 @@ namespace AnyAnglePathfinding.Partition
         public int NumPartitions;
 
         /// <summary>
-        /// The maps which are referenced from partitions but not reused. Any changes in indexes requires 
+        /// The maps which are referenced from partitions but not reused. Any changes in indexes requires
         /// updating partitions.
         /// </summary>
         public PartitionMap[] Maps;
@@ -199,7 +199,7 @@ namespace AnyAnglePathfinding.Partition
         public readonly int TriggerCreatePartitionEntities;
 
         /// <summary>
-        /// Having this many or fewer entities in a single partition will trigger collapsing the partition. Should be 
+        /// Having this many or fewer entities in a single partition will trigger collapsing the partition. Should be
         /// no greater than MinPartitionEntities*2 - 1. The bigger the gap between triggering create and triggering
         /// destroy the better the performance.
         /// </summary>
@@ -227,7 +227,7 @@ namespace AnyAnglePathfinding.Partition
         private int CollidableCounter;
 
         /// <summary>
-        /// Creates a new automatic rectangle-partitioning map with the given width and height. Entity bounding boxes should be within 
+        /// Creates a new automatic rectangle-partitioning map with the given width and height. Entity bounding boxes should be within
         /// the rectangle (0, 0) and (Width, Height). This is important for FindPartitions
         /// </summary>
         /// <param name="width"></param>
@@ -486,7 +486,7 @@ namespace AnyAnglePathfinding.Partition
         }
 
         /// <summary>
-        /// Finds all the maps that intersect any of the given polygons when positioned at pos and stores them as 
+        /// Finds all the maps that intersect any of the given polygons when positioned at pos and stores them as
         /// indices in Maps into maps. This is equivalent to repeated calls to FindPartitions and removing duplicates
         /// except faster.
         /// </summary>
@@ -730,9 +730,19 @@ namespace AnyAnglePathfinding.Partition
         /// </summary>
         /// <param name="points">the points we can split between</param>
         /// <param name="edgesSkipped">the number of edge points ignored, must be at least 1</param>
+        /// <param name="avoidA">
+        /// The first edge point; if we choose a value too close to the edge we
+        /// get an improper split. Normally this is naturally avoided from the
+        /// choice of punish function and edgesSkipped, since we will only
+        /// select a point which has at least edgesSkipped entities on either
+        /// side, however when all the entities "stack" on top of each other at
+        /// the edges of the split it's possible that we still select a bad
+        /// split if we don't explicitly avoid the edges
+        /// </param>
+        /// <param name="avoidB">The second point to avoid</param>
         /// <param name="bestLoc">we will store the best split point here</param>
         /// <param name="bestPunish">we will store the punish at the best split point here</param>
-        public void SelectSplitPoint(double[] points, int edgesSkipped, out double bestLoc, out double bestPunish)
+        public void SelectSplitPoint(double[] points, int edgesSkipped, double avoidA, double avoidB, out double bestLoc, out double bestPunish)
         {
             bestLoc = 0;
             bestPunish = double.PositiveInfinity;
@@ -768,7 +778,7 @@ namespace AnyAnglePathfinding.Partition
                     }
                 }
 
-                if (punishAtGuess < bestPunish)
+                if (punishAtGuess < bestPunish && Math.Abs(guessPoint - avoidA) > Math2.DEFAULT_EPSILON && Math.Abs(guessPoint - avoidB) > Math2.DEFAULT_EPSILON)
                 {
                     bestPunish = punishAtGuess;
                     bestLoc = guessPoint;
@@ -938,12 +948,12 @@ namespace AnyAnglePathfinding.Partition
 
             int edgesSkipped = (points.Length - viableEntries) / 2;
 
-            SelectSplitPoint(points, edgesSkipped, out double bestHorizLoc, out double bestHorizPunish);
+            SelectSplitPoint(points, edgesSkipped, (0 - addH) / multH, (this.Maps[mapInd].Rect.Width - addH) / multH, out double bestHorizLoc, out double bestHorizPunish);
 
             points = CalculatePoints(mapInd, false, out double multV, out double addV);
             Array.Sort(points); // Ascending
 
-            SelectSplitPoint(points, edgesSkipped, out double bestVertLoc, out double bestVertPunish);
+            SelectSplitPoint(points, edgesSkipped, (0 - addV) / multV, (this.Maps[mapInd].Rect.Height - addV) / multV, out double bestVertLoc, out double bestVertPunish);
 
             if (bestVertPunish < bestHorizPunish)
             {
@@ -1227,7 +1237,7 @@ namespace AnyAnglePathfinding.Partition
         }
 
         /// <summary>
-        /// Calculates where on the map the side of the given partition belongs. This does not 
+        /// Calculates where on the map the side of the given partition belongs. This does not
         /// require that we have a leaf node in the specified spot
         /// </summary>
         /// <param name="partInd">The partition</param>
@@ -1547,7 +1557,7 @@ namespace AnyAnglePathfinding.Partition
         /// <summary>
         /// Checks if there are any entities intersecting any of the given polygons which do not have an ID
         /// in excludeIds and do not have any of the exclude flags.
-        /// 
+        ///
         /// Returns true if there are no intersecting entities, returns false if there are intersecting entities
         /// </summary>
         /// <param name="traces">The polygons to check if any entities intersect</param>
@@ -1584,7 +1594,7 @@ namespace AnyAnglePathfinding.Partition
 
 
         /// <summary>
-        /// Checks what entities if any intersect any of the specified traces 
+        /// Checks what entities if any intersect any of the specified traces
         /// </summary>
         /// <param name="traces">The set of traces to check</param>
         /// <param name="from">Where the traces start at</param>
